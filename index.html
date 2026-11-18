@@ -1,0 +1,227 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BONGO MUSIC AI</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #0b0614;
+            color: white;
+            min-height: 100vh;
+        }
+
+        header {
+            padding: 25px 8%;
+            border-bottom: 1px solid #30213f;
+        }
+
+        .logo {
+            font-size: 25px;
+            font-weight: bold;
+            color: #c084fc;
+        }
+
+        .logo span {
+            color: #facc15;
+        }
+
+        main {
+            max-width: 800px;
+            margin: 100px auto;
+            padding: 20px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 42px;
+            margin-bottom: 15px;
+        }
+
+        h1 span {
+            color: #c084fc;
+        }
+
+        .subtitle {
+            color: #b9afc8;
+            margin-bottom: 40px;
+            line-height: 1.7;
+        }
+
+        .search-box {
+            display: flex;
+            background: #1b1228;
+            border: 1px solid #604080;
+            border-radius: 14px;
+            padding: 8px;
+        }
+
+        input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: white;
+            padding: 15px;
+            font-size: 16px;
+        }
+
+        button {
+            background: #9333ea;
+            color: white;
+            border: none;
+            padding: 14px 22px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background: #7e22ce;
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        #chat-area {
+            margin-top: 30px;
+            padding: 25px;
+            background: #1b1228;
+            border: 1px solid #604080;
+            border-radius: 14px;
+            line-height: 1.8;
+            overflow-wrap: anywhere;
+        }
+
+        footer {
+            text-align: center;
+            color: #766a83;
+            margin-top: 100px;
+            padding: 20px;
+        }
+
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 30px;
+            }
+
+            .search-box {
+                flex-direction: column;
+                gap: 8px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <div class="logo">BONGO <span>MUSIC AI</span></div>
+    </header>
+
+    <main>
+
+        <h1>Discover <span>Tanzanian Music</span></h1>
+
+        <p class="subtitle">
+            Your smart assistant for exploring Tanzanian artists,
+            their stories, popular songs, genres and albums.
+        </p>
+
+        <div class="search-box">
+
+            <input
+                type="text"
+                id="artist-input"
+                placeholder="Search an artist... / Tafuta msanii..."
+            >
+
+            <button id="search-button">
+                Search Artist
+            </button>
+
+        </div>
+
+        <div id="chat-area">
+            <h2>Welcome to BONGO MUSIC AI 🎵</h2>
+            <p>Your music discovery journey starts here.</p>
+        </div>
+
+    </main>
+
+    <footer>
+        © 2026 BONGO MUSIC AI. All rights reserved.
+    </footer>
+
+    <script>
+        const artistInput = document.getElementById("artist-input");
+        const searchButton = document.getElementById("search-button");
+        const chatArea = document.getElementById("chat-area");
+
+        searchButton.addEventListener("click", async function () {
+
+            const artistName = artistInput.value.trim();
+
+            if (artistName === "") {
+                chatArea.innerHTML =
+                    "<p>Please enter an artist name.</p>";
+                return;
+            }
+
+            searchButton.disabled = true;
+            chatArea.innerHTML = "<p>Sending artist name to server...</p>";
+
+            try {
+                const response = await fetch("/api/artist", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        artistName: artistName
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error("Server error");
+                }
+
+                const data = await response.json();
+
+                const heading = document.createElement("h2");
+                heading.textContent = "Artist Search 🎵";
+
+                const artistParagraph = document.createElement("p");
+                artistParagraph.textContent = "Server received: " + data.artist;
+
+                const messageParagraph = document.createElement("p");
+                messageParagraph.textContent = data.message;
+
+                chatArea.replaceChildren(
+                    heading,
+                    artistParagraph,
+                    messageParagraph
+                );
+
+            } catch (error) {
+                chatArea.innerHTML =
+                    "<p>Connection error. Please check your server and try again.</p>";
+            } finally {
+                searchButton.disabled = false;
+            }
+        });
+    </script>
+
+</body>
+</html>
